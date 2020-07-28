@@ -1,0 +1,100 @@
+package todoApp.entity;
+
+import java.time.LocalDate;
+import javax.json.bind.annotation.JsonbDateFormat;
+import javax.persistence.*;
+import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+
+@Entity
+// Queries that will be used for get Specific Todo from database
+@NamedQuery(name = Todo.FIND_TODO_BY_TASK, query = "select t from Todo t where t.task like :task and t.todoOwner.email = :email")
+@NamedQuery(name = Todo.FIND_ALL_TODOS_BY_USER, query = "select t from Todo t where t.todoOwner.email = :email")
+@NamedQuery(name = Todo.FIND_TODO_BY_ID, query = "select t from Todo t where t.id = :id and t.todoOwner.email = :email")
+public class Todo extends AbstractEntity{
+
+    // Queries names that will be used in QueryService for executing them in database
+    public static final String FIND_TODO_BY_TASK = "Todo.findByTask";
+    public static final String FIND_ALL_TODOS_BY_USER = "Todo.findByUser";
+    public static final String FIND_TODO_BY_ID = "Todo.findById";
+
+
+    // Description of task
+    @NotEmpty(message = "Task must be set")
+    @Size(min = 10, message = "Task should not be less than 10 characters")
+    private String task;
+
+    // Deadline
+    @NotNull(message = "Due must be set")
+    @FutureOrPresent(message = "Dude must be in the present or future")
+    @JsonbDateFormat(value = "yyyy-MM-dd")
+    private LocalDate dueDate;
+
+
+    private boolean isCompleted;
+    private LocalDate dateCompleted;
+    private LocalDate dateCreated;
+
+    // One user can own multiple todos
+    @ManyToOne
+    private User todoOwner;
+
+    @PrePersist
+    private void init() {
+        setDateCreated(LocalDate.now());
+    }
+
+
+    public User getTodoOwner() {
+        return todoOwner;
+    }
+
+    public void setTodoOwner(User todoOwner) {
+        this.todoOwner = todoOwner;
+    }
+
+    public String getTask() {
+        return task;
+    }
+
+    public void setTask(String task) {
+        this.task = task;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public boolean isIsCompleted() {
+        return isCompleted;
+    }
+
+    public void setIsCompleted(boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
+
+    public LocalDate getDateCompleted() {
+        return dateCompleted;
+    }
+
+    public void setDateCompleted(LocalDate dateCompleted) {
+        this.dateCompleted = dateCompleted;
+    }
+
+    public LocalDate getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDate dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+
+}
